@@ -12,6 +12,7 @@ use ggez::
 };
 
 mod window;
+mod state;
 
 use window::Window;
 
