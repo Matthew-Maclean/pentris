@@ -4,9 +4,12 @@ use ggez::
     GameResult,
 };
 
+use crate::game::Game;
+
 pub enum State
 {
     Void,
+    Game(Game),
 }
 
 pub enum Transition
@@ -17,10 +20,11 @@ pub enum Transition
 
 impl State
 {
-    pub fn update(&self, ctx: &mut Context) -> GameResult<Option<Transition>>
+    pub fn update(&mut self, ctx: &mut Context) -> GameResult<Option<Transition>>
     {
         match self
         {
+            State::Game(ref mut game) => game.update(ctx),
             _ => Ok(None)
         }
     }
@@ -30,6 +34,7 @@ impl State
     {
         match self
         {
+            State::Game(ref game) => game.draw(ctx, scale, offset),
             _ => Ok(())
         }
     }
@@ -38,7 +43,8 @@ impl State
     {
         match self
         {
-            _ => [0; 2],
+            State::Game(ref game) => game.size(),
+            _ => [1; 2], // don't divide by zero
         }
     }
 }

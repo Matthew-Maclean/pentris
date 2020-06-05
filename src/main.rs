@@ -13,6 +13,7 @@ use ggez::
 
 mod window;
 mod state;
+mod game;
 
 use window::Window;
 
@@ -22,7 +23,8 @@ fn main() -> GameResult
         .window_setup(WindowSetup::default()
             .title("pentris"))
         .window_mode(WindowMode::default()
-            .dimensions(500.0, 500.0))
+            .dimensions(500.0, 500.0)
+            .resizable(true))
         .build()?;
 
     let mut window = Window::new(&mut ctx)?;
