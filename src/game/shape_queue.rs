@@ -172,39 +172,46 @@ impl ShapeQueue
     {
         use ggez::graphics::{DrawParam, draw};
 
+        let sixteenth = 1.0 / 16.0;
+
         let start = [
             1.0 + super::BOARD_DIMENSIONS[0] as f32 + 1.0,
             1.0 + 3.0 + 1.0,
         ];
 
+        let shape_scale = [
+            (2.0 - (sixteenth * 2.0)) / 5.0,
+            (2.0 - (sixteenth * 2.0)) / 5.0,
+        ];
+
         draw(ctx, &self.first, DrawParam::default()
             .dest([
-                offset[0] + start[0] * scale,
-                offset[1] + start[1] * scale,
+                offset[0] + (start[0] + sixteenth) * scale,
+                offset[1] + (start[1] + sixteenth) * scale,
             ])
             .scale([
-                scale * (2.0 / 5.0),
-                scale * (2.0 / 5.0),
+                scale * shape_scale[0],
+                scale * shape_scale[1],
             ]))?;
 
         draw(ctx, &self.second, DrawParam::default()
             .dest([
-                offset[0] + start[0] * scale,
-                offset[1] + (start[1] + 2.0) * scale,
+                offset[0] + (start[0] + sixteenth) * scale,
+                offset[1] + (start[1] + 2.0 + sixteenth) * scale,
             ])
             .scale([
-                scale * (2.0 / 5.0),
-                scale * (2.0 / 5.0),
+                scale * shape_scale[0],
+                scale * shape_scale[1],
             ]))?;
 
         draw(ctx, &self.third, DrawParam::default()
             .dest([
-                offset[0] + start[0] * scale,
-                offset[1] + (start[1] + 4.0) * scale,
+                offset[0] + (start[0] + sixteenth) * scale,
+                offset[1] + (start[1] + 4.0 + sixteenth) * scale,
             ])
             .scale([
-                scale * (2.0 / 5.0),
-                scale * (2.0 / 5.0),
+                scale * shape_scale[0],
+                scale * shape_scale[1],
             ]))?;
 
         draw(ctx, &self.outline, DrawParam::default()
