@@ -3,18 +3,19 @@ use ggez::
     Context,
     GameResult,
     input::keyboard::KeyCode,
-    graphics::Mesh,
 };
 
 use crate::state::Transition;
 
 mod grid;
+mod piece;
 mod shape;
 mod rotation;
 mod shape_queue;
 mod store_window;
 
 use grid::Grid;
+use piece::Piece;
 use shape::{Shape, ShapeData};
 use rotation::Rotation;
 use shape_queue::ShapeQueue;
@@ -29,6 +30,7 @@ pub struct Game
     shape_data: ShapeData,
 
     grid: Grid,
+    piece: Piece,
     store_window: StoreWindow,
     shape_queue: ShapeQueue,
 }
@@ -45,7 +47,9 @@ impl Game
     pub fn new(ctx: &mut Context) -> GameResult<Game>
     {
         let shape_data = ShapeData::init(ctx)?;
-        let shape_queue = ShapeQueue::new(ctx, &shape_data)?;
+        let mut shape_queue = ShapeQueue::new(ctx, &shape_data)?;
+        let piece = Piece::new(
+            shape_queue.next(&shape_data), [7, 9], &shape_data);
         Ok(Game
         {
             phase: GamePhase::Begin,
@@ -53,6 +57,7 @@ impl Game
             shape_data: shape_data,
 
             grid: Grid::new(ctx)?,
+            piece: piece,
             store_window: StoreWindow::new(ctx)?,
             shape_queue: shape_queue,
         })
@@ -71,6 +76,8 @@ impl Game
     pub fn draw(&self, ctx: &mut Context, scale: f32, offset: [f32; 2])
         -> GameResult
     {
+        self.piece.draw(ctx, scale, offset)?;
+
         self.grid.draw(ctx, scale, offset)?;
 
         self.store_window.draw(ctx, scale, offset)?;

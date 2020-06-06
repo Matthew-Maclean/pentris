@@ -206,6 +206,18 @@ impl Grid
         Ok(())
     }
 
+    pub fn is_set(&self, pos: [i32; 2]) -> bool
+    {
+        if Grid::in_bounds(pos)
+        {
+            self.tiles[pos[0] as usize][pos[1] as usize]
+        }
+        else
+        {
+            false
+        }
+    }
+
     pub fn draw(&self, ctx: &mut Context, scale: f32, offset: [f32; 2])
         -> GameResult
     {
