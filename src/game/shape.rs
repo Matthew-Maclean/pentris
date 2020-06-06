@@ -11,6 +11,8 @@ use ggez::
 
 use super::Rotation;
 
+pub const NUM_SHAPES: u8 = 12;
+
 #[derive(Copy, Clone)]
 pub enum Shape
 {
@@ -32,7 +34,7 @@ impl Shape
 {
     pub fn numbered(n: u8) -> Shape
     {
-        match n % 12
+        match n % NUM_SHAPES
         {
             0 => Shape::F,
             1 => Shape::I,

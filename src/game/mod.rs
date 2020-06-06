@@ -11,11 +11,13 @@ use crate::state::Transition;
 mod grid;
 mod shape;
 mod rotation;
+mod shape_queue;
 mod store_window;
 
 use grid::Grid;
 use shape::{Shape, ShapeData};
 use rotation::Rotation;
+use shape_queue::ShapeQueue;
 use store_window::StoreWindow;
 
 const BOARD_DIMENSIONS: [u32; 2] = [15, 20];
@@ -28,6 +30,7 @@ pub struct Game
 
     grid: Grid,
     store_window: StoreWindow,
+    shape_queue: ShapeQueue,
 }
 
 #[derive(Copy, Clone)]
@@ -41,14 +44,17 @@ impl Game
 {
     pub fn new(ctx: &mut Context) -> GameResult<Game>
     {
+        let shape_data = ShapeData::init(ctx)?;
+        let shape_queue = ShapeQueue::new(ctx, &shape_data)?;
         Ok(Game
         {
             phase: GamePhase::Begin,
 
-            shape_data: ShapeData::init(ctx)?,
+            shape_data: shape_data,
 
             grid: Grid::new(ctx)?,
             store_window: StoreWindow::new(ctx)?,
+            shape_queue: shape_queue,
         })
     }
 
@@ -68,6 +74,8 @@ impl Game
         self.grid.draw(ctx, scale, offset)?;
 
         self.store_window.draw(ctx, scale, offset)?;
+
+        self.shape_queue.draw(ctx, scale, offset)?;
 
         Ok(())
     }
