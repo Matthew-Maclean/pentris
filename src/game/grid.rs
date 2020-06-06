@@ -15,6 +15,8 @@ use ggez::
     },
 };
 
+use super::shape::Tiles;
+
 const FILLED_COLOUR: (u8, u8, u8) = (128, 128, 128);
 
 pub struct Grid
@@ -159,6 +161,51 @@ impl Grid
         })
     }
 
+    pub fn set_tiles(&mut self, tiles: &Tiles, pos: [i32; 2]) -> GameResult
+    {
+        for tile in super::shape::stamp_tiles(tiles, pos).iter()
+        {
+            self.fill_tile(*tile)?;
+        }
+
+        Ok(())
+    }
+
+    fn fill_tile(&mut self, tile: [i32; 2]) -> GameResult
+    {
+        if Grid::in_bounds(tile)
+        {
+            let y = (super::BOARD_DIMENSIONS[1] - 1 - tile[1] as u32) as usize;
+            let x = tile[0] as usize;
+
+            self.tiles[x][y] = true;
+            self.batch.set(self.indices[x][y], DrawParam::default()
+                .dest([x as f32, y as f32])
+                .scale([1.0, 1.0]))?;
+        }
+
+        Ok(())
+    }
+
+    pub fn clear(&mut self) -> GameResult
+    {
+        for y in 0..super::BOARD_DIMENSIONS[1]
+        {
+            for x in 0..super::BOARD_DIMENSIONS[0]
+            {
+                let y = (super::BOARD_DIMENSIONS[1] - 1 - y) as usize;
+                let x = x as usize;
+
+                self.tiles[x][y] = false;
+                self.batch.set(self.indices[x][y], DrawParam::default()
+                    .dest([x as f32, y as f32])
+                    .scale([0.0, 0.0]))?;
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn draw(&self, ctx: &mut Context, scale: f32, offset: [f32; 2])
         -> GameResult
     {
@@ -176,5 +223,11 @@ impl Grid
             .scale([scale; 2]))?;
 
         Ok(())
+    }
+
+    pub fn in_bounds(pos: [i32; 2]) -> bool
+    {
+        pos[0] >= 0 && pos[0] < super::BOARD_DIMENSIONS[0] as i32 &&
+            pos[1] >= 0 && pos[1] < super::BOARD_DIMENSIONS[1] as i32
     }
 }

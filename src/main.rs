@@ -1,11 +1,11 @@
 use ggez::
 {
-    Context,
     GameResult,
     ContextBuilder,
     conf::
     {
         WindowMode,
+        NumSamples,
         WindowSetup,
     },
     event::run,
@@ -21,7 +21,8 @@ fn main() -> GameResult
 {
     let (mut ctx, mut eloop) = ContextBuilder::new("pentris", "pentris")
         .window_setup(WindowSetup::default()
-            .title("pentris"))
+            .title("pentris")
+            .samples(NumSamples::One))
         .window_mode(WindowMode::default()
             .dimensions(500.0, 500.0)
             .resizable(true))

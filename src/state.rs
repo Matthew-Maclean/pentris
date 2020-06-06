@@ -2,6 +2,7 @@ use ggez::
 {
     Context,
     GameResult,
+    input::keyboard::KeyCode,
 };
 
 use crate::game::Game;
@@ -26,6 +27,15 @@ impl State
         {
             State::Game(ref mut game) => game.update(ctx),
             _ => Ok(None)
+        }
+    }
+
+    pub fn key_down(&mut self, key: KeyCode, repeat: bool)
+    {
+        match self
+        {
+            State::Game(ref mut game) => game.key_down(key, repeat),
+            _ => { },
         }
     }
 

@@ -3,6 +3,7 @@ use ggez::
     Context,
     GameResult,
     event::EventHandler,
+    input::keyboard::{KeyCode, KeyMods},
 };
 
 use crate::state::{State, Transition};
@@ -49,7 +50,7 @@ impl Window
         self.scale = f32::min(
             self.size[0] / state_size[0] as f32,
             self.size[1] / state_size[1] as f32);
-        
+
         self.offset = [
             (self.size[0] - self.scale * state_size[0] as f32) / 2.0,
             (self.size[1] - self.scale * state_size[1] as f32) / 2.0];
@@ -79,6 +80,14 @@ impl EventHandler for Window
         }
 
         Ok(())
+    }
+
+    fn key_down_event(
+        &mut self, _ctx: &mut Context, key: KeyCode, _: KeyMods, repeat: bool)
+    {
+        self.states.last_mut()
+            .unwrap()
+            .key_down(key, repeat);
     }
 
     fn resize_event(&mut self, ctx: &mut Context, w: f32, h: f32)
