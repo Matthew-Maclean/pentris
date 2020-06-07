@@ -16,25 +16,65 @@ pub struct Piece
     flip: bool,
 
     pos: [i32; 2],
-    fractional: f32,
+    shadow: [i32; 2],
 
     mesh: Mesh,
 }
 
 impl Piece
 {
-    pub fn new(shape: Shape, pos: [i32; 2], shape_data: &ShapeData) -> Piece
+    pub fn new(
+        shape: Shape, pos: [i32; 2], grid: &Grid, shape_data: &ShapeData)
+        -> Piece
     {
-        Piece
+        let mut p = Piece
         {
             shape: shape,
             rotation: Rotation::Zero,
             flip: false,
 
             pos: pos,
-            fractional: 0.0,
+            shadow: pos,
 
             mesh: shape_data.get_mesh(shape, Rotation::Zero, false).clone(),
+        };
+
+        p.shadow = p.shadow_pos(grid, shape_data);
+
+        p
+    }
+
+    pub fn pos(&self) -> [i32; 2]
+    {
+        self.pos
+    }
+
+    pub fn shape(&self) -> Shape
+    {
+        self.shape
+    }
+
+    pub fn set_shape(
+        &mut self, shape: Shape, grid: &Grid, shape_data: &ShapeData) -> bool
+    {
+        use super::shape::stamp_tiles;
+
+        if stamp_tiles(
+            shape_data
+                .get_tiles(shape, self.rotation, self.flip),
+                self.pos)
+            .iter()
+            .all(|tile| Grid::in_bounds(*tile) && !grid.is_set(*tile))
+        {
+            self.shape = shape;
+            self.mesh = shape_data.get_mesh(
+                self.shape, self.rotation, self.flip).clone();
+            self.shadow = self.shadow_pos(&grid, &shape_data);
+            true
+        }
+        else
+        {
+            false
         }
     }
 
@@ -53,6 +93,7 @@ impl Piece
             .all(|tile| Grid::in_bounds(*tile) && !grid.is_set(*tile))
         {
             self.pos = new_pos;
+            self.shadow = self.shadow_pos(&grid, &shape_data);
             true
         }
         else
@@ -77,6 +118,7 @@ impl Piece
             self.rotation = new_rot;
             self.mesh = shape_data.get_mesh(
                 self.shape, self.rotation, self.flip).clone();
+            self.shadow = self.shadow_pos(grid, shape_data);
             true
         }
         else
@@ -101,6 +143,7 @@ impl Piece
             self.rotation = new_rot;
             self.mesh = shape_data.get_mesh(
                 self.shape, self.rotation, self.flip).clone();
+            self.shadow = self.shadow_pos(grid, shape_data);
             true
         }
         else
@@ -125,12 +168,34 @@ impl Piece
             self.flip = new_flip;
             self.mesh = shape_data.get_mesh(
                 self.shape, self.rotation, self.flip).clone();
+            self.shadow = self.shadow_pos(grid, shape_data);
             true
         }
         else
         {
             false
         }
+    }
+
+    pub fn shadow_pos(&mut self, grid: &Grid, shape_data: &ShapeData)
+        -> [i32; 2]
+    {
+        let mut pos = self.pos;
+
+        while
+        {
+            let tiles = super::shape::stamp_tiles(
+                shape_data.get_tiles(self.shape, self.rotation, self.flip),
+                [pos[0], pos[1] - 1]);
+
+            tiles.iter().all(|tile|
+                Grid::in_bounds(*tile) && !grid.is_set(*tile))
+        }
+        {
+            pos[1] -= 1;
+        }
+
+        pos
     }
 
     pub fn set(&self, grid: &mut Grid, shape_data: &ShapeData) -> GameResult
@@ -147,6 +212,20 @@ impl Piece
             DrawParam,
             draw,
         };
+
+        draw(ctx, &self.mesh, DrawParam::default()
+            .dest([
+                offset[0] + (1.0 + self.shadow[0] as f32 - 2.0) * scale,
+                offset[1]
+                    + (1.0
+                    + super::BOARD_DIMENSIONS[1] as f32
+                    - 1.0
+                    - self.shadow[1] as f32
+                    - 2.0) * scale,
+            ])
+            .scale([scale, scale])
+            .color(self.shape.shadow_colour()))?;
+
 
         draw(ctx, &self.mesh, DrawParam::default()
             .dest([

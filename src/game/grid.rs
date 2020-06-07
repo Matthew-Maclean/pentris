@@ -187,6 +187,81 @@ impl Grid
         Ok(())
     }
 
+    pub fn check_line(&self, line: usize) -> bool
+    {
+        let mut row = [false; super::BOARD_DIMENSIONS[0] as usize];
+
+        for x in 0..super::BOARD_DIMENSIONS[0] as usize
+        {
+            row[x] = self.tiles[x][line];
+        }
+
+        row == [true; super::BOARD_DIMENSIONS[0] as usize]
+    }
+
+    pub fn clear_line(&mut self, line: usize) -> GameResult
+    {
+        if line < super::BOARD_DIMENSIONS[1] as usize
+        {
+            for x in 0..super::BOARD_DIMENSIONS[0] as usize
+            {
+                self.tiles[x][line] = false;
+
+                self.batch.set(self.indices[x][line], DrawParam::default()
+                    .scale([0.0, 0.0]))?;
+            }
+        }
+
+        Ok(())
+    }
+
+    pub fn move_down(
+        &mut self, clear: [bool; super::BOARD_DIMENSIONS[1] as usize])
+        -> GameResult
+    {
+        for y in 0..super::BOARD_DIMENSIONS[1] as usize
+        {
+            if clear[y]
+            {
+                for y in (0..=y).rev()
+                {
+                    for x in 0..super::BOARD_DIMENSIONS[0] as usize
+                    {
+                        if y == 0
+                        {
+                            self.tiles[x][y] = false;
+                        }
+                        else
+                        {
+                            self.tiles[x][y] = self.tiles[x][y - 1];
+                        }
+                    }
+                }
+            }
+        }
+
+        for y in 0..super::BOARD_DIMENSIONS[1] as usize
+        {
+            for x in 0..super::BOARD_DIMENSIONS[0] as usize
+            {
+                if self.tiles[x][y]
+                {
+                    self.batch.set(self.indices[x][y], DrawParam::default()
+                        .dest([x as f32, y as f32])
+                        .scale([1.0, 1.0]))?;
+                }
+                else
+                {
+                    self.batch.set(self.indices[x][y], DrawParam::default()
+                        .dest([x as f32, y as f32])
+                        .scale([0.0, 0.0]))?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn clear(&mut self) -> GameResult
     {
         for y in 0..super::BOARD_DIMENSIONS[1]
@@ -208,6 +283,8 @@ impl Grid
 
     pub fn is_set(&self, pos: [i32; 2]) -> bool
     {
+        let pos = [pos[0], (super::BOARD_DIMENSIONS[1] as i32 - 1 - pos[1])];
+
         if Grid::in_bounds(pos)
         {
             self.tiles[pos[0] as usize][pos[1] as usize]

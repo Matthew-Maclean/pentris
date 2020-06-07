@@ -75,6 +75,11 @@ impl StoreWindow
         })
     }
 
+    pub fn stored(&self) -> Option<Shape>
+    {
+        self.stored.as_ref().map(|(shape, _)| *shape)
+    }
+
     pub fn store(&mut self, shape: Shape, data: &ShapeData) -> Option<Shape>
     {
         use super::Rotation;

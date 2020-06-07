@@ -70,6 +70,25 @@ impl Shape
             Shape::Z => (255, 64 , 159),
         }.into()
     }
+
+    pub fn shadow_colour(self) -> Colour
+    {
+        match self
+        {
+            Shape::F => (128, 32 , 32 ),
+            Shape::I => (128, 80 , 32 ),
+            Shape::L => (128, 128, 32 ),
+            Shape::N => (80 , 128, 32 ),
+            Shape::P => (32 , 128, 32 ),
+            Shape::T => (32 , 128, 80 ),
+            Shape::U => (32 , 128, 128),
+            Shape::V => (32 , 80 , 128),
+            Shape::W => (32 , 32 , 128),
+            Shape::X => (80 , 32 , 128),
+            Shape::Y => (128, 32 , 128),
+            Shape::Z => (128, 32 , 80 ),
+        }.into()
+    }
 }
 
 pub struct ShapeData

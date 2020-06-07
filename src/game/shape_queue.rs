@@ -103,6 +103,11 @@ impl ShapeQueue
         })
     }
 
+    pub fn peek(&self) -> Shape
+    {
+        self.bag_one[self.index]
+    }
+
     pub fn next(&mut self, shape_data: &ShapeData) -> Shape
     {
         use super::rotation::Rotation;
