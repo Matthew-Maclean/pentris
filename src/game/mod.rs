@@ -62,7 +62,11 @@ impl Game
         let mut shape_queue = ShapeQueue::new(ctx, &shape_data)?;
         let grid = Grid::new(ctx)?;
         let piece = Piece::new(
-            shape_queue.next(&shape_data), [7, 9], &grid, &shape_data);
+            shape_queue.next(&shape_data),
+            [
+                (BOARD_DIMENSIONS[0] / 2) as i32,
+                (BOARD_DIMENSIONS[1] - 3) as i32
+            ], &grid, &shape_data);
         Ok(Game
         {
             phase: GamePhase::Begin,
