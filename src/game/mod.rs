@@ -9,6 +9,7 @@ mod grid;
 mod piece;
 mod input;
 mod shape;
+mod counter;
 mod rotation;
 mod shape_queue;
 mod store_window;
@@ -17,11 +18,13 @@ use grid::Grid;
 use piece::Piece;
 use input::Input;
 use shape::{Shape, ShapeData};
+use counter::Counter;
 use rotation::Rotation;
 use shape_queue::ShapeQueue;
 use store_window::StoreWindow;
 
 const BOARD_DIMENSIONS: [u32; 2] = [15, 20];
+const MIN_SPEED: u64 = 60;
 
 pub struct Game
 {
@@ -36,6 +39,7 @@ pub struct Game
     store_window: StoreWindow,
     stored_recently: bool,
     shape_queue: ShapeQueue,
+    counter: Counter,
 
     score: u32,
     speed: u64,
@@ -78,9 +82,10 @@ impl Game
             store_window: StoreWindow::new(ctx)?,
             stored_recently: false,
             shape_queue: shape_queue,
+            counter: Counter::new(ctx)?,
 
             score: 0,
-            speed: 60,
+            speed: MIN_SPEED,
 
             play_tick: 0,
             pause_tick: 0,
@@ -239,16 +244,18 @@ impl Game
                     any_clear = true;
                     self.grid.clear_line(y)?;
                     self.score += 1;
-                    if self.speed > 1
-                    {
-                        self.speed -= 1;
-                    }
+                    self.counter.update_score(self.score);
                 }
             }
 
             if any_clear
             {
                 self.phase = GamePhase::ClearPause(lines);
+                if self.speed > 1
+                {
+                    self.speed -= 1;
+                    self.counter.update_speed(MIN_SPEED - self.speed + 1);
+                }
             }
         }
 
@@ -284,6 +291,8 @@ impl Game
         self.store_window.draw(ctx, scale, offset)?;
 
         self.shape_queue.draw(ctx, scale, offset)?;
+
+        self.counter.draw(ctx, scale, offset)?;
 
         Ok(())
     }
