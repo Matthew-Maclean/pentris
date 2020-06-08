@@ -64,7 +64,7 @@ impl Piece
                 .get_tiles(shape, self.rotation, self.flip),
                 self.pos)
             .iter()
-            .all(|tile| Grid::in_bounds(*tile) && !grid.is_set(*tile))
+            .all(|tile| Grid::in_bounds_ex_top(*tile) && !grid.is_set(*tile))
         {
             self.shape = shape;
             self.mesh = shape_data.get_mesh(
@@ -90,7 +90,7 @@ impl Piece
                 .get_tiles(self.shape, self.rotation, self.flip),
                 new_pos)
             .iter()
-            .all(|tile| Grid::in_bounds(*tile) && !grid.is_set(*tile))
+            .all(|tile| Grid::in_bounds_ex_top(*tile) && !grid.is_set(*tile))
         {
             self.pos = new_pos;
             self.shadow = self.shadow_pos(&grid, &shape_data);
@@ -113,7 +113,7 @@ impl Piece
                 .get_tiles(self.shape, new_rot, self.flip),
                 self.pos)
             .iter()
-            .all(|tile| Grid::in_bounds(*tile) && !grid.is_set(*tile))
+            .all(|tile| Grid::in_bounds_ex_top(*tile) && !grid.is_set(*tile))
         {
             self.rotation = new_rot;
             self.mesh = shape_data.get_mesh(
@@ -138,7 +138,7 @@ impl Piece
                 .get_tiles(self.shape, new_rot, self.flip),
                 self.pos)
             .iter()
-            .all(|tile| Grid::in_bounds(*tile) && !grid.is_set(*tile))
+            .all(|tile| Grid::in_bounds_ex_top(*tile) && !grid.is_set(*tile))
         {
             self.rotation = new_rot;
             self.mesh = shape_data.get_mesh(
@@ -163,7 +163,7 @@ impl Piece
                 .get_tiles(self.shape, self.rotation, new_flip),
                 self.pos)
             .iter()
-            .all(|tile| Grid::in_bounds(*tile) && !grid.is_set(*tile))
+            .all(|tile| Grid::in_bounds_ex_top(*tile) && !grid.is_set(*tile))
         {
             self.flip = new_flip;
             self.mesh = shape_data.get_mesh(
@@ -189,7 +189,7 @@ impl Piece
                 [pos[0], pos[1] - 1]);
 
             tiles.iter().all(|tile|
-                Grid::in_bounds(*tile) && !grid.is_set(*tile))
+                Grid::in_bounds_ex_top(*tile) && !grid.is_set(*tile))
         }
         {
             pos[1] -= 1;

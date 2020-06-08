@@ -69,12 +69,32 @@ impl Shape
             Shape::Z => (128, 32 , 80 ),
         }.into()
     }
+
+    pub fn start_pos(self) -> u32
+    {
+        match self
+        {
+            Shape::F => 1,
+            Shape::I => 2,
+            Shape::L => 1,
+            Shape::N => 1,
+            Shape::P => 1,
+            Shape::T => 1,
+            Shape::U => 0,
+            Shape::V => 1,
+            Shape::W => 1,
+            Shape::X => 1,
+            Shape::Y => 1,
+            Shape::Z => 1,
+        }
+    }
 }
 
 pub struct ShapeData
 {
     tiles: ShapeTiles,
     meshes: ShapeMeshes,
+    pub header: Mesh,
 }
 
 impl ShapeData
@@ -689,6 +709,13 @@ impl ShapeData
                 z_flip: ShapeData::make_mesh_group(ctx, &tiles.z_flip)?,
             },
             tiles: tiles,
+            header: Mesh::new_rectangle(
+                ctx,
+                ggez::graphics::DrawMode::fill(),
+                ggez::graphics::Rect::new(
+                    0.0, 0.0,
+                    super::BOARD_DIMENSIONS[0] as f32, 1.0 - (1.0 / 16.0)),
+                (0, 0, 0).into())?,
         })
     }
 

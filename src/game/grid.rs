@@ -319,4 +319,10 @@ impl Grid
         pos[0] >= 0 && pos[0] < super::BOARD_DIMENSIONS[0] as i32 &&
             pos[1] >= 0 && pos[1] < super::BOARD_DIMENSIONS[1] as i32
     }
+
+    pub fn in_bounds_ex_top(pos: [i32; 2]) -> bool
+    {
+        pos[0] >= 0 && pos[0] < super::BOARD_DIMENSIONS[0] as i32 &&
+            pos[1] >= 0
+    }
 }

@@ -63,11 +63,12 @@ impl Game
         let shape_data = ShapeData::init(ctx)?;
         let mut shape_queue = ShapeQueue::new(ctx, &shape_data)?;
         let grid = Grid::new(ctx)?;
+        let first_shape = shape_queue.next(&shape_data);
         let piece = Piece::new(
-            shape_queue.next(&shape_data),
+            first_shape,
             [
                 (BOARD_DIMENSIONS[0] / 2) as i32,
-                (BOARD_DIMENSIONS[1] - 3) as i32
+                (BOARD_DIMENSIONS[1] + first_shape.start_pos()) as i32
             ], &grid, &shape_data);
         Ok(Game
         {
@@ -222,11 +223,13 @@ impl Game
         {
             self.piece.set(&mut self.grid, &self.shape_data)?;
 
+            let next_shape = self.shape_queue.next(&self.shape_data);
+
             self.piece = Piece::new(
-                self.shape_queue.next(&self.shape_data),
+                next_shape,
                 [
                     (BOARD_DIMENSIONS[0] / 2) as i32,
-                    (BOARD_DIMENSIONS[1] - 3) as i32
+                    (BOARD_DIMENSIONS[1] + next_shape.start_pos()) as i32
                 ],
                 &self.grid,
                 &self.shape_data);
@@ -284,7 +287,17 @@ impl Game
     pub fn draw(&self, ctx: &mut Context, scale: f32, offset: [f32; 2])
         -> GameResult
     {
+        use ggez::graphics::
+        {
+            DrawParam,
+            draw,
+        };
+
         self.piece.draw(ctx, scale, offset)?;
+
+        draw(ctx, &self.shape_data.header, DrawParam::default()
+            .dest([1.0, 0.0])
+            .scale([scale, scale]))?;
 
         self.grid.draw(ctx, scale, offset)?;
 
