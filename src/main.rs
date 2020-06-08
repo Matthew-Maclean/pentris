@@ -12,7 +12,6 @@ use ggez::
 };
 
 mod window;
-mod state;
 mod game;
 
 use window::Window;

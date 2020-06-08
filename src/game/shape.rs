@@ -32,26 +32,6 @@ pub enum Shape
 
 impl Shape
 {
-    pub fn numbered(n: u8) -> Shape
-    {
-        match n % NUM_SHAPES
-        {
-            0 => Shape::F,
-            1 => Shape::I,
-            2 => Shape::L,
-            3 => Shape::N,
-            4 => Shape::P,
-            5 => Shape::T,
-            6 => Shape::U,
-            7 => Shape::V,
-            8 => Shape::W,
-            9 => Shape::X,
-            10 => Shape::Y,
-            11 => Shape::Z,
-            _ => unreachable!(),
-        }
-    }
-
     pub fn colour(self) -> Colour
     {
         match self

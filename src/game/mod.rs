@@ -5,8 +5,6 @@ use ggez::
     input::keyboard::KeyCode,
 };
 
-use crate::state::Transition;
-
 mod grid;
 mod piece;
 mod input;
@@ -89,8 +87,7 @@ impl Game
         })
     }
 
-    pub fn update(&mut self, _ctx: &mut Context)
-        -> GameResult<Option<Transition>>
+    pub fn update(&mut self) -> GameResult
     {
         match self.phase
         {
@@ -120,7 +117,7 @@ impl Game
             },
         }
 
-        Ok(None)
+        Ok(())
     }
 
     fn normal_tick(&mut self) -> GameResult
