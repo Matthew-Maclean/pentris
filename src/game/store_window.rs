@@ -105,7 +105,8 @@ impl StoreWindow
         self.stored = None;
     }
 
-    pub fn draw(&self, ctx: &mut Context, scale: f32, offset: [f32; 2])
+    pub fn draw(
+        &self, ctx: &mut Context, scale: f32, offset: [f32; 2], normal: bool)
         -> GameResult
     {
         use ggez::graphics::
@@ -113,24 +114,26 @@ impl StoreWindow
             DrawParam,
             draw,
         };
-
-        if let Some((shape, ref mesh)) = self.stored
+        if normal
         {
-            let sixteenth = 1.0 / 16.0;
+            if let Some((shape, ref mesh)) = self.stored
+            {
+                let sixteenth = 1.0 / 16.0;
 
-            use super::BOARD_DIMENSIONS;
+                use super::BOARD_DIMENSIONS;
 
-            draw(ctx, mesh, DrawParam::default()
-                .dest([
-                    offset[0] + (BOARD_DIMENSIONS[0] as f32 + 2.0 + sixteenth)
-                        * scale,
-                    offset[1] + (1.0 + sixteenth) * scale,
-                ])
-                .scale([
-                    scale * ((3.0 - sixteenth * 2.0) / 5.0),
-                    scale * ((3.0 - sixteenth * 2.0) / 5.0),
-                ])
-                .color(Shape::colour(shape)))?;
+                draw(ctx, mesh, DrawParam::default()
+                    .dest([
+                        offset[0] + (BOARD_DIMENSIONS[0] as f32 + 2.0 + sixteenth)
+                            * scale,
+                        offset[1] + (1.0 + sixteenth) * scale,
+                    ])
+                    .scale([
+                        scale * ((3.0 - sixteenth * 2.0) / 5.0),
+                        scale * ((3.0 - sixteenth * 2.0) / 5.0),
+                    ])
+                    .color(Shape::colour(shape)))?;
+            }
         }
 
         draw(ctx, &self.outline, DrawParam::default()

@@ -204,6 +204,13 @@ impl Piece
             self.shape, self.rotation, self.flip), self.pos)
     }
 
+    pub fn is_above_top(&self, shape_data: &ShapeData) -> bool
+    {
+        shape_data.get_tiles(self.shape, self.rotation, self.flip).iter()
+            .any(|tile|
+                self.pos[1] + tile[1] >= super::BOARD_DIMENSIONS[1] as i32)
+    }
+
     pub fn draw(&self, ctx: &mut Context, scale: f32, offset: [f32; 2])
         -> GameResult
     {

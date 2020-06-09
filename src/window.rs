@@ -57,9 +57,9 @@ impl Window
 
 impl EventHandler for Window
 {
-    fn update(&mut self, _ctx: &mut Context) -> GameResult
+    fn update(&mut self, ctx: &mut Context) -> GameResult
     {
-        self.game.update()
+        self.game.update(ctx)
     }
 
     fn key_down_event(

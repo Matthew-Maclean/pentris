@@ -9,4 +9,5 @@ pub enum Input
     RotateCCW,
     Flip,
     Select,
+    Restart,
 }

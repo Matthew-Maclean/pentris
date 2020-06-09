@@ -11,6 +11,7 @@ mod input;
 mod shape;
 mod counter;
 mod rotation;
+mod end_screen;
 mod shape_queue;
 mod store_window;
 mod begin_screen;
@@ -21,6 +22,7 @@ use input::Input;
 use shape::{Shape, ShapeData};
 use counter::Counter;
 use rotation::Rotation;
+use end_screen::EndScreen;
 use shape_queue::ShapeQueue;
 use store_window::StoreWindow;
 use begin_screen::BeginScreen;
@@ -37,6 +39,7 @@ pub struct Game
     inputs: Vec<Input>,
 
     begin_screen: BeginScreen,
+    end_screen: EndScreen,
 
     grid: Grid,
     piece: Piece,
@@ -58,6 +61,7 @@ pub enum GamePhase
     Begin,
     Normal,
     ClearPause([bool; BOARD_DIMENSIONS[1] as usize]),
+    End,
 }
 
 impl Game
@@ -77,6 +81,7 @@ impl Game
             inputs: Vec::new(),
 
             begin_screen: BeginScreen::new(ctx)?,
+            end_screen: EndScreen::new(ctx)?,
 
             grid: grid,
             piece: piece,
@@ -97,7 +102,7 @@ impl Game
         Ok(game)
     }
 
-    pub fn update(&mut self) -> GameResult
+    pub fn update(&mut self, ctx: &mut Context) -> GameResult
     {
         match self.phase
         {
@@ -123,6 +128,21 @@ impl Game
 
                     self.pause_tick = 0;
                     self.phase = GamePhase::Normal;
+                }
+            },
+            GamePhase::End =>
+            {
+                while let Some(input) = self.inputs.pop()
+                {
+                    match input
+                    {
+                        Input::Restart =>
+                        {
+                            self.reset(ctx)?;
+                            self.phase = GamePhase::Begin;
+                        }
+                        _ => { },
+                    }
                 }
             },
         }
@@ -225,6 +245,12 @@ impl Game
 
         if set
         {
+            if self.piece.is_above_top(&self.shape_data)
+            {
+                self.phase = GamePhase::End;
+                return Ok(());
+            }
+
             self.piece.set(&mut self.grid, &self.shape_data)?;
 
             let next_shape = self.shape_queue.next(&self.shape_data);
@@ -317,6 +343,7 @@ impl Game
                 KeyCode::E => self.inputs.push(Input::RotateCW),
                 KeyCode::LShift => self.inputs.push(Input::Flip),
                 KeyCode::Return => self.inputs.push(Input::Select),
+                KeyCode::R => self.inputs.push(Input::Restart),
                 _ => { },
             }
         }
@@ -346,7 +373,11 @@ impl Game
 
         self.grid.draw(ctx, scale, offset)?;
 
-        self.store_window.draw(ctx, scale, offset)?;
+        self.store_window.draw(ctx, scale, offset, match self.phase
+        {
+            GamePhase::Normal => true,
+            _ => false,
+        })?;
 
         self.shape_queue.draw(ctx, scale, offset, match self.phase
         {
@@ -359,6 +390,11 @@ impl Game
         if let GamePhase::Begin = self.phase
         {
             self.begin_screen.draw(ctx, scale, offset)?;
+        }
+
+        if let GamePhase::End = self.phase
+        {
+            self.end_screen.draw(ctx, scale, offset)?;
         }
 
         Ok(())
