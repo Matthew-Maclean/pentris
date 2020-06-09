@@ -15,6 +15,7 @@ mod end_screen;
 mod shape_queue;
 mod store_window;
 mod begin_screen;
+mod pause_screen;
 
 use grid::Grid;
 use piece::Piece;
@@ -26,6 +27,7 @@ use end_screen::EndScreen;
 use shape_queue::ShapeQueue;
 use store_window::StoreWindow;
 use begin_screen::BeginScreen;
+use pause_screen::PauseScreen;
 
 const BOARD_DIMENSIONS: [u32; 2] = [15, 20];
 const MIN_SPEED: u64 = 60;
@@ -40,6 +42,7 @@ pub struct Game
 
     begin_screen: BeginScreen,
     end_screen: EndScreen,
+    pause_screen: PauseScreen,
 
     grid: Grid,
     piece: Piece,
@@ -60,6 +63,7 @@ pub enum GamePhase
 {
     Begin,
     Normal,
+    Pause,
     ClearPause([bool; BOARD_DIMENSIONS[1] as usize]),
     End,
 }
@@ -82,6 +86,7 @@ impl Game
 
             begin_screen: BeginScreen::new(ctx)?,
             end_screen: EndScreen::new(ctx)?,
+            pause_screen: PauseScreen::new(ctx)?,
 
             grid: grid,
             piece: piece,
@@ -118,6 +123,17 @@ impl Game
                 }
             }
             GamePhase::Normal => self.normal_tick()?,
+            GamePhase::Pause =>
+            {
+                while let Some(input) = self.inputs.pop()
+                {
+                    match input
+                    {
+                        Input::Pause => self.phase = GamePhase::Normal,
+                        _ => { },
+                    }
+                }
+            },
             GamePhase::ClearPause(lines) =>
             {
                 self.pause_tick += 1;
@@ -239,6 +255,11 @@ impl Game
                 {
                     self.piece.flip(&self.grid, &self.shape_data);
                 },
+                Input::Pause => if !set
+                {
+                    self.phase = GamePhase::Pause;
+                    return Ok(());
+                },
                 _ => { },
             }
         }
@@ -344,6 +365,7 @@ impl Game
                 KeyCode::LShift => self.inputs.push(Input::Flip),
                 KeyCode::Return => self.inputs.push(Input::Select),
                 KeyCode::R => self.inputs.push(Input::Restart),
+                KeyCode::P => self.inputs.push(Input::Pause),
                 _ => { },
             }
         }
@@ -361,6 +383,7 @@ impl Game
         if match self.phase
         {
             GamePhase::Normal => true,
+            GamePhase::Pause => true,
             _ => false,
         }
         {
@@ -376,25 +399,25 @@ impl Game
         self.store_window.draw(ctx, scale, offset, match self.phase
         {
             GamePhase::Normal => true,
+            GamePhase::Pause => true,
             _ => false,
         })?;
 
         self.shape_queue.draw(ctx, scale, offset, match self.phase
         {
             GamePhase::Normal => true,
+            GamePhase::Pause => true,
             _ => false,
         })?;
 
         self.counter.draw(ctx, scale, offset)?;
 
-        if let GamePhase::Begin = self.phase
+        match self.phase
         {
-            self.begin_screen.draw(ctx, scale, offset)?;
-        }
-
-        if let GamePhase::End = self.phase
-        {
-            self.end_screen.draw(ctx, scale, offset)?;
+            GamePhase::Begin => self.begin_screen.draw(ctx, scale, offset)?,
+            GamePhase::Pause => self.pause_screen.draw(ctx, scale, offset)?,
+            GamePhase::End => self.end_screen.draw(ctx, scale, offset)?,
+            _ => { },
         }
 
         Ok(())

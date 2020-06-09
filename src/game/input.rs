@@ -10,4 +10,5 @@ pub enum Input
     Flip,
     Select,
     Restart,
+    Pause,
 }
