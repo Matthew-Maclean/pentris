@@ -13,6 +13,7 @@ mod counter;
 mod rotation;
 mod shape_queue;
 mod store_window;
+mod begin_screen;
 
 use grid::Grid;
 use piece::Piece;
@@ -22,6 +23,7 @@ use counter::Counter;
 use rotation::Rotation;
 use shape_queue::ShapeQueue;
 use store_window::StoreWindow;
+use begin_screen::BeginScreen;
 
 const BOARD_DIMENSIONS: [u32; 2] = [15, 20];
 const MIN_SPEED: u64 = 60;
@@ -33,6 +35,8 @@ pub struct Game
     shape_data: ShapeData,
 
     inputs: Vec<Input>,
+
+    begin_screen: BeginScreen,
 
     grid: Grid,
     piece: Piece,
@@ -61,22 +65,18 @@ impl Game
     pub fn new(ctx: &mut Context) -> GameResult<Game>
     {
         let shape_data = ShapeData::init(ctx)?;
-        let mut shape_queue = ShapeQueue::new(ctx, &shape_data)?;
+        let shape_queue = ShapeQueue::new(ctx, &shape_data)?;
         let grid = Grid::new(ctx)?;
-        let first_shape = shape_queue.next(&shape_data);
-        let piece = Piece::new(
-            first_shape,
-            [
-                (BOARD_DIMENSIONS[0] / 2) as i32,
-                (BOARD_DIMENSIONS[1] + first_shape.start_pos()) as i32
-            ], &grid, &shape_data);
-        Ok(Game
+        let piece = Piece::new(Shape::I, [0; 2], &grid, &shape_data);
+        let mut game = Game
         {
             phase: GamePhase::Begin,
 
             shape_data: shape_data,
 
             inputs: Vec::new(),
+
+            begin_screen: BeginScreen::new(ctx)?,
 
             grid: grid,
             piece: piece,
@@ -90,7 +90,11 @@ impl Game
 
             play_tick: 0,
             pause_tick: 0,
-        })
+        };
+
+        game.reset(ctx)?;
+
+        Ok(game)
     }
 
     pub fn update(&mut self) -> GameResult
@@ -265,6 +269,40 @@ impl Game
         Ok(())
     }
 
+    fn reset(&mut self, ctx: &mut Context) -> GameResult
+    {
+        self.shape_queue = ShapeQueue::new(ctx, &self.shape_data)?;
+
+        self.grid.clear()?;
+
+        let first_shape = self.shape_queue.next(&self.shape_data);
+        self.piece = Piece::new(
+            first_shape,
+            [
+                (BOARD_DIMENSIONS[0] / 2) as i32,
+                (BOARD_DIMENSIONS[1] + first_shape.start_pos()) as i32
+            ], &self.grid, &self.shape_data);
+
+        self.phase = GamePhase::Begin;
+
+        self.inputs = Vec::new();
+
+        self.store_window.clear();
+
+        self.stored_recently = false;
+
+        self.score = 0;
+        self.speed = MIN_SPEED;
+
+        self.counter.update_score(self.score);
+        self.counter.update_speed(MIN_SPEED - self.speed + 1);
+
+        self.play_tick = 0;
+        self.pause_tick = 0;
+
+        Ok(())
+    }
+
     pub fn key_down(&mut self, key: KeyCode, repeat: bool)
     {
         if !repeat
@@ -293,7 +331,14 @@ impl Game
             draw,
         };
 
-        self.piece.draw(ctx, scale, offset)?;
+        if match self.phase
+        {
+            GamePhase::Normal => true,
+            _ => false,
+        }
+        {
+            self.piece.draw(ctx, scale, offset)?;
+        }
 
         draw(ctx, &self.shape_data.header, DrawParam::default()
             .dest([1.0, 0.0])
@@ -303,9 +348,18 @@ impl Game
 
         self.store_window.draw(ctx, scale, offset)?;
 
-        self.shape_queue.draw(ctx, scale, offset)?;
+        self.shape_queue.draw(ctx, scale, offset, match self.phase
+        {
+            GamePhase::Normal => true,
+            _ => false,
+        })?;
 
         self.counter.draw(ctx, scale, offset)?;
+
+        if let GamePhase::Begin = self.phase
+        {
+            self.begin_screen.draw(ctx, scale, offset)?;
+        }
 
         Ok(())
     }

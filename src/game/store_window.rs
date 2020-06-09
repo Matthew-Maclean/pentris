@@ -100,6 +100,11 @@ impl StoreWindow
         prev
     }
 
+    pub fn clear(&mut self)
+    {
+        self.stored = None;
+    }
+
     pub fn draw(&self, ctx: &mut Context, scale: f32, offset: [f32; 2])
         -> GameResult
     {

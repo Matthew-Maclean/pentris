@@ -172,7 +172,8 @@ impl ShapeQueue
         bag
     }
 
-    pub fn draw(&self, ctx: &mut Context, scale: f32, offset: [f32; 2])
+    pub fn draw(
+        &self, ctx: &mut Context, scale: f32, offset: [f32; 2], normal: bool)
         -> GameResult
     {
         use ggez::graphics::{DrawParam, draw};
@@ -189,35 +190,38 @@ impl ShapeQueue
             (2.0 - (sixteenth * 2.0)) / 5.0,
         ];
 
-        draw(ctx, &self.first, DrawParam::default()
-            .dest([
-                offset[0] + (start[0] + sixteenth) * scale,
-                offset[1] + (start[1] + sixteenth) * scale,
-            ])
-            .scale([
-                scale * shape_scale[0],
-                scale * shape_scale[1],
-            ]))?;
+        if normal
+        {
+            draw(ctx, &self.first, DrawParam::default()
+                .dest([
+                    offset[0] + (start[0] + sixteenth) * scale,
+                    offset[1] + (start[1] + sixteenth) * scale,
+                ])
+                .scale([
+                    scale * shape_scale[0],
+                    scale * shape_scale[1],
+                ]))?;
 
-        draw(ctx, &self.second, DrawParam::default()
-            .dest([
-                offset[0] + (start[0] + sixteenth) * scale,
-                offset[1] + (start[1] + 2.0 + sixteenth) * scale,
-            ])
-            .scale([
-                scale * shape_scale[0],
-                scale * shape_scale[1],
-            ]))?;
+            draw(ctx, &self.second, DrawParam::default()
+                .dest([
+                    offset[0] + (start[0] + sixteenth) * scale,
+                    offset[1] + (start[1] + 2.0 + sixteenth) * scale,
+                ])
+                .scale([
+                    scale * shape_scale[0],
+                    scale * shape_scale[1],
+                ]))?;
 
-        draw(ctx, &self.third, DrawParam::default()
-            .dest([
-                offset[0] + (start[0] + sixteenth) * scale,
-                offset[1] + (start[1] + 4.0 + sixteenth) * scale,
-            ])
-            .scale([
-                scale * shape_scale[0],
-                scale * shape_scale[1],
-            ]))?;
+            draw(ctx, &self.third, DrawParam::default()
+                .dest([
+                    offset[0] + (start[0] + sixteenth) * scale,
+                    offset[1] + (start[1] + 4.0 + sixteenth) * scale,
+                ])
+                .scale([
+                    scale * shape_scale[0],
+                    scale * shape_scale[1],
+                ]))?;
+        }
 
         draw(ctx, &self.outline, DrawParam::default()
             .dest(offset)
