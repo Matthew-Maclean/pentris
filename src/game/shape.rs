@@ -101,6 +101,7 @@ impl ShapeData
 {
     pub fn init(ctx: &mut Context) -> GameResult<ShapeData>
     {
+
         let tiles = ShapeTiles
         {
             f: TileGroup
@@ -713,8 +714,10 @@ impl ShapeData
                 ctx,
                 ggez::graphics::DrawMode::fill(),
                 ggez::graphics::Rect::new(
-                    0.0, 0.0,
-                    super::BOARD_DIMENSIONS[0] as f32, 1.0 - (1.0 / 16.0)),
+                    1.0,
+                    0.0,
+                    super::BOARD_DIMENSIONS[0] as f32 + 1.0,
+                    1.0 - (1.0 / 16.0)),
                 (0, 0, 0).into())?,
         })
     }
